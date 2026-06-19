@@ -26,10 +26,19 @@ objects_list <- list("peach", "pear", "cherry", "strawberry", "blackberry")
 ## 3.1. Using for loop ---------------------------
 
 ## Create an empty list
+messages_list <- list()
 
+for (i in 1:length(objects_list)) {
+    
+    messages_list[[i]] <- str_glue("this is a {objects_list[[i]]}")
+}
 
 ## 3.2. Using functional programming -------------
 
+messages_list <- map(
+    objects_list,
+    \(fruit) str_glue("This fruit is a {fruit}")
+) 
 
 # 4. Model by species -----------------------------------------------------
 
@@ -44,25 +53,53 @@ species_vec <- unique(iris_tbl$Species)
 filtered_lst <- list()
 
 ## Iterate to filter each species
+for (species in 1:length(species_vec)) {
+    ##Filter observations
+    iris_filtered <- iris_tbl %>% 
+        filter(
+            Species == species_vec[species]
+        )
+    ## Calculate linear model
+    iris_filtered_lm <- lm(Petal.Length ~ Sepal.Length, data = iris_filtered)
+    ## Get summary
+    filtered_lst[[species]] <- summary(iris_filtered_lm)
+}
 
+filtered_lst
 
 ## 4.2. Using functional programming --------------
 
 ## Create a function
-
+calculate_iris_lm <- function(data) {
+    
+    lm(Petal.Length ~ Sepal.Length, data = data) |>
+        summary()
+    
+}
 
 ## Create list
-
+iris_species_list <- iris_tbl |>
+    split(iris_tbl$Species)
 
 ## Iterate over the list
-
+map(
+    iris_species_list,
+    calculate_iris_lm
+)
 
 ## 4.3. In one step ---------------------------------
-
+iris_tbl %>% 
+    split(iris_tbl$Species) |>
+    map(calculate_iris_lm)
 
 ## 4.4. Using anonymous function --------------------
-
-
+## 4.3. In one step ---------------------------------
+iris_tbl %>% 
+    split(iris_tbl$Species) |>
+    map(
+        \(data) lm(Petal.Length ~ Sepal.Length, data = data) %>% 
+            summary()
+    )
 # 5. Iterating 2 inputs --------------------------------------------------
 
 ## 5.1. Simple example ----------------------------
