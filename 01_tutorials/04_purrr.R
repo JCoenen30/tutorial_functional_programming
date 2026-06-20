@@ -108,6 +108,7 @@ iris_tbl %>%
 ## Sum over the lists
 fruits <- list("peach", "pear", "cherry", "strawberry", "blackberry")
 colors <- list("orange", "green", "red", "red", "black")
+rounded <- c("rounded", "not rounded", "rounded", "not rounded", "rounded")
 
 ## Iterate to create the sentence
 map2_chr(
@@ -115,6 +116,16 @@ map2_chr(
     .y = colors,
     \(fruit, color) str_glue("The color of {fruit} is {color}")
 ) 
+
+## Iterate over 3 vectors
+pmap(
+    .l = list(
+        fruits,
+        colors,
+        rounded
+    ),
+    \(fruit, color, rounded) str_glue("The color of {fruit} is {color} and {rounded}")
+)
 
 ## 5.2. A bigger example --------------------------
 
