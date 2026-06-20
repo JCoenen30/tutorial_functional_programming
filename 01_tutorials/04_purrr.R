@@ -100,6 +100,7 @@ iris_tbl %>%
         \(data) lm(Petal.Length ~ Sepal.Length, data = data) %>% 
             summary()
     )
+
 # 5. Iterating 2 inputs --------------------------------------------------
 
 ## 5.1. Simple example ----------------------------
@@ -109,19 +110,53 @@ fruits <- list("peach", "pear", "cherry", "strawberry", "blackberry")
 colors <- list("orange", "green", "red", "red", "black")
 
 ## Iterate to create the sentence
-
+map2_chr(
+    .x = fruits,
+    .y = colors,
+    \(fruit, color) str_glue("The color of {fruit} is {color}")
+) 
 
 ## 5.2. A bigger example --------------------------
 
 ## Create a grid of parameters
-
+params_tbl <- expand_grid(
+    ntree = c(100, 200, 500, 1000), 
+    mtry  = 1:4
+)
 
 ## Create a Random Forest model for each parameter
+ranger(
+    formula   = Sepal.Length ~ .,
+    data      = iris_tbl,
+    num.trees = 500, 
+    mtry      = 1 
+)
+
+iris_rf_list <- map2(
+    .x = params_tbl$ntree,
+    .y = params_tbl$mtry,
+    \(ntree, mtry) ranger(
+        formula   = Sepal.Length ~ .,
+        data      = iris_tbl,
+        num.trees = ntree, 
+        mtry      = mtry 
+    )
+)
 
 
 ## Extract r.squared
-
+map_dbl(
+    iris_rf_list,
+    \(rf_model) rf_model$r.squared
+)
 
 ## Add as a new column
-
+params_tbl |>
+    mutate(
+        rsq = map_dbl(
+            iris_rf_list,
+            \(rf_model) rf_model$r.squared
+        ) 
+    ) |>
+    arrange(desc(rsq))
 
